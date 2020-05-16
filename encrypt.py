@@ -39,12 +39,6 @@ def main():
   )
   payload = aes.encrypt(plaintext)
 
-  print("key:", key.hex())
-  print("salt:", salt.hex())
-  print("iv:", hex(iv))
-  print("payload:", payload.hex())
-
-
   print(inspect.cleandoc(f'''
         salt: "{b64encode(salt).decode("utf-8")}"
         iv: "{format(iv,'x')}"
