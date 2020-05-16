@@ -1,0 +1,19 @@
+<article class="c-article">
+  <header class="c-article__header">
+    <h1 class="c-article__title">{{ page.title }}</h1>
+    <p class="c-article__time"><time datetime="{{ page.date | date_to_xmlschema }}" itemprop="datePublished">{{ page.date | date: "%b %-d, %Y" }}</time></p>
+  </header>
+  <div class="c-article__main" id="main">
+    {% if page.redirect_to %}
+      <a href="{{ page.redirect_to }}"> {{ page.redirect_to }} </a>
+    {% endif %}
+  </div>
+  <!-- Previous / Next Buttons -->
+  <!-- Disqus comments view -->
+  {% if page.comments != false and site.disqus_id %}
+  <div class="post-disqus">
+    <section id="disqus_thread"></section>
+    {% include disqus.html %}
+  </div>
+  {% endif %}
+</article>

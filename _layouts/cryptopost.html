@@ -1,0 +1,135 @@
+---
+layout: default
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ page.title }}</title>
+  </head>
+  <body>
+
+  {% include cryptostyle.html %}
+
+  {% include header.html %}
+
+  <div class="c-page__main">
+  {% include post.liquid %}
+  </div>
+
+  {% include footer.html %}
+
+
+    <div id="dialogWrap" >
+        <div id="dialogWrapCell">
+            <div id="mainDialog">
+                <h1 id="dialogText">This link is password protected.</h1>
+                <div id="passArea">
+                    <h2 id="passwordPrompt">Password</h2>
+                    <input id="pass" type="password" name="pass">
+                    <div>
+                        <span id="messageWrapper">
+                            <h3 id="invalidPass" class="notifyText">Sorry, please try again.</h3>
+                            <h3 id="success" class="notifyText">Success!</h3>
+                            &nbsp;
+                        </span>
+                        <h2><div id="submitPass" role="button" class="mouseover">Submit</div></h2>
+                        <div style="clear: both;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% include CryptoJS.html %}
+
+    <script>
+
+        var submitPass = document.getElementById('submitPass');
+        var passEl = document.getElementById('pass');
+        var invalidPassEl = document.getElementById('invalidPass');
+        var successEl = document.getElementById('success');
+
+        function doSubmit(evt) {
+            try {
+                console.log("{{ page.payload }}");
+                var decrypted = decryptFile(
+                  CryptoJS.enc.Base64.parse("{{ page.payload }}"),
+                  passEl.value,
+                  CryptoJS.enc.Base64.parse("{{ page.salt }}"),
+                  CryptoJS.enc.Hex.parse("{{ page.iv }}")
+                );
+                console.log("alphabet");
+                console.log(decrypted);
+                if (decrypted === "") throw "No data returned";
+
+                // location=decrypted;
+                document.getElementById("main").innerHTML = `<a href="${decrypted}"> ${decrypted} </a>`;
+
+
+                successEl.style.display = "inline";
+                passEl.disabled = true;
+                submitPass.disabled = true;
+                setTimeout(function() {
+                    dialogWrap.style.display = "none";
+                }, 1000);
+            } catch (e) {
+                console.log(e);
+                invalidPassEl.style.display = "inline";
+                passEl.value = "";
+            }
+        }
+
+        submitPass.onclick = doSubmit;
+        passEl.onkeypress = function(e){
+            if (!e) e = window.event;
+            var keyCode = e.keyCode || e.which;
+            invalidPassEl.style.display = "none";
+            if (keyCode == '13'){
+              // Enter pressed
+              doSubmit();
+              return false;
+            }
+        }
+
+        function decryptFile(payload, password, salt, iv) {
+            var _cp = CryptoJS.lib.CipherParams.create(
+              { ciphertext: payload }
+            );
+            console.log('payload', payload.toString(CryptoJS.enc.Hex));
+            console.log('password', password);
+            console.log('salt', salt.toString(CryptoJS.enc.Hex));
+            var key = CryptoJS.PBKDF2(
+              password,
+              salt,
+              { keySize: 256/32, iterations: 1000 }
+            );
+            console.log('key', key.toString(CryptoJS.enc.Hex));
+            console.log('iv', iv.toString(CryptoJS.enc.Hex));
+            var decrypted = CryptoJS.AES.decrypt(
+              _cp,
+              key,
+              {
+                iv: iv,
+                mode: CryptoJS.mode.CTR,
+                padding: CryptoJS.pad.NoPadding,
+              }
+            );
+            console.log('decrypted', decrypted.toString(CryptoJS.enc.Hex));
+            console.log('decrypted', decrypted.toString(CryptoJS.enc.Utf8));
+            return decrypted.toString(CryptoJS.enc.Utf8);
+        }
+    </script>
+
+  </body>
+</html>
+
+<!-- Copyright (c) 2015 Maximillian Laumeister
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. -->
