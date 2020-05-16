@@ -65,7 +65,7 @@ layout: default
                 console.log(decrypted);
                 if (decrypted === "") throw "No data returned";
 
-                // location=decrypted;
+                location=decrypted;
                 document.getElementById("main").innerHTML = `<a href="${decrypted}"> ${decrypted} </a>`;
 
 
